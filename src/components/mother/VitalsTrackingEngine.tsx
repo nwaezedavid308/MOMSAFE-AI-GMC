@@ -566,7 +566,7 @@ export default function VitalsTrackingEngine({
                   : "bg-white border border-slate-200 text-slate-600"
               }`}
             >
-              <span>{sleptOnLeft ? "✓ Slept on Left Side (Optimal Flow)" : "Tap if Slept on Left Side"}</span>
+              <span>{sleptOnLeft ? "Slept on Left Side (Optimal Flow)" : "Tap if Slept on Left Side"}</span>
             </button>
           </div>
 

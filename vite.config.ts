@@ -12,6 +12,9 @@ export default defineConfig(() => {
       },
     },
     server: {
+      // Local Windows paths containing ~ are encoded inconsistently by Vite 6.
+      // The preview binds locally; production uses Express static serving.
+      fs: { strict: false },
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',

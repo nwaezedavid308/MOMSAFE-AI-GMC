@@ -153,7 +153,7 @@ export default function AuthOnboarding({ onAuthSuccess, onSkip }: AuthOnboarding
             }`}
           >
             <PlusCircle className="w-3.5 h-3.5" />
-            <span>Onboard / Register</span>
+            <span>Register</span>
           </button>
         </div>
       </div>
@@ -162,10 +162,10 @@ export default function AuthOnboarding({ onAuthSuccess, onSkip }: AuthOnboarding
         {/* Role Picker Description */}
         <div className="space-y-2 text-center">
           <h3 className="font-bold text-sm text-slate-800 uppercase tracking-wider">
-            {mode === "login" ? "Select Your Portal Access Profile" : "Choose Onboarding Account Type"}
+            {mode === "login" ? "Who are you?" : "Who is this account for?"}
           </h3>
           <p className="text-xs text-slate-500 max-w-sm mx-auto">
-            Your selected role determines which specialized portal tools, clinical assistants, or queue boards you access.
+            Choose your role, then enter your details below.
           </p>
         </div>
 
@@ -182,7 +182,7 @@ export default function AuthOnboarding({ onAuthSuccess, onSkip }: AuthOnboarding
             }`}
           >
             <UserCheck className="w-5 h-5 mb-1.5" />
-            <span className="text-[10px] font-bold uppercase tracking-wider">Local TBA</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider">Birth attendant</span>
           </button>
 
           {/* Patient Role Button */}
@@ -210,7 +210,7 @@ export default function AuthOnboarding({ onAuthSuccess, onSkip }: AuthOnboarding
             }`}
           >
             <Landmark className="w-5 h-5 mb-1.5" />
-            <span className="text-[10px] font-bold uppercase tracking-wider">GMC Admin</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider">Hospital staff</span>
           </button>
         </div>
 

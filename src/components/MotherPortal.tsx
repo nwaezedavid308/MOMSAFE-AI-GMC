@@ -258,7 +258,7 @@ export default function MotherPortal({
         lossOfConsciousness: false,
         reducedFetalMovement: dangerChecks.babyNotMoving,
         laborProgressConcerns: dangerChecks.waterBroke,
-        customNote: "MAMAALERT CRITICAL 1-TAP EMERGENCY SOS TRIGGERED BY MOTHER. Immediate dispatch needed to Umuchigbo.",
+        customNote: "MAMAALERT CRITICAL Get emergency help TRIGGERED BY MOTHER. Immediate dispatch needed to Umuchigbo.",
         systolicBP: 145,
         diastolicBP: 95,
         pulse: 105,
@@ -366,7 +366,7 @@ export default function MotherPortal({
   const activeDangerCount = Object.values(dangerChecks).filter(Boolean).length;
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="mother-portal space-y-6 pb-12">
       
       {/* GLOBAL LOCAL LANGUAGE & SPOKEN VOICE AUDIO BAR */}
       <LanguageSpeechHeader
@@ -375,78 +375,31 @@ export default function MotherPortal({
         screenContext="mother"
       />
 
-      {/* 1. MAMAALERT BRAND HERO BANNER */}
-      <div className="bg-gradient-to-br from-[#32134F] via-[#4A1D6D] to-[#1F0833] rounded-3xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold border border-white/15">
-              <Sparkles className="w-3.5 h-3.5 text-pink-300" />
-              <span>MamaAlert Powered • Googwill Medical Centre Lifeline</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight flex items-center gap-2">
-              <span>{language === "igbo" ? `Nnọọ, ${currentUser?.name || "Nne Anyị"}` : language === "pidgin" ? `Welcome, ${currentUser?.name || "Mama"}` : `Welcome, ${currentUser?.name || "Mother"}`}</span>
-              <Heart className="w-6 h-6 text-pink-400 fill-pink-400 inline" />
-            </h1>
-            <p className="text-xs sm:text-sm text-purple-200 max-w-xl leading-relaxed">
-              {language === "igbo" 
-                ? "Nlekọta ahụ ike dị mfe n'asụsụ Igbo, enyemaka mberede ngwa ngwa, na mkparịta ụka dọkịta GMC maka nne na nwa."
-                : language === "pidgin"
-                ? "Easy maternal health guidance for Pidgin, 1-tap emergency rescue, and direct GMC hospital care for every mother."
-                : "AI health guidance, 1-tap emergency rescue, maternal vitals tracking, and a Nigerian sisterhood community that truly understands."}
-            </p>
-          </div>
-
-          {/* Persistent Action Buttons */}
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0 self-start md:self-center">
-            {/* Big 1-Tap SOS Button */}
-            <button
-              onClick={handleTriggerSos}
-              className="px-5 py-3 bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white font-black text-xs sm:text-sm rounded-2xl shadow-xl hover:shadow-red-500/30 flex items-center justify-center gap-2 border border-red-400/40 transition-all cursor-pointer active:scale-95 animate-pulse"
-            >
-              <ShieldAlert className="w-5 h-5 text-white" />
-              <span>1-TAP EMERGENCY SOS</span>
-            </button>
-
-            {/* Offline USSD Dialer */}
-            <button
-              onClick={() => {
-                setShowUssdModal(true);
-                setUssdLogs(["Dialing *384*99# on GSM SIM network..."]);
-                setUssdStep(1);
-              }}
-              className="px-3.5 py-3 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-2xl border border-white/15 backdrop-blur-md flex items-center gap-1.5 transition-all cursor-pointer"
-              title="Works without internet via standard mobile USSD code"
-            >
-              <Radio className="w-4 h-4 text-emerald-400" />
-              <span className="hidden sm:inline">Offline USSD (*384*99#)</span>
-              <span className="sm:hidden">USSD</span>
-            </button>
-          </div>
-        </div>
+      <div className="mother-primary-actions">
+        <p>{language === "igbo" ? "Lelee ahụ ike gị. Họrọ ihe ị chọrọ n'okpuru." : language === "pidgin" ? "Check how your body dey. Choose wetin you need below." : "Start with how you feel. Get help if you need it."}</p>
+        <button onClick={handleTriggerSos} className="urgent-action"><ShieldAlert size={20}/>{language === "igbo" ? "Enyemaka mberede" : "Emergency help"}</button>
       </div>
-
       {/* 2. TOP-LEVEL PILLAR NAVIGATION BAR */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-2 shadow-xs">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+      <details className="mvp-disclosure mother-menu"><summary><span><Heart size={19}/>{language === "igbo" ? "Họrọ ihe ị chọrọ" : language === "pidgin" ? "Other things you fit do" : "More care tools"}</span><ChevronRight size={18}/></summary>
+        <div className="mother-tools" role="navigation" aria-label="Mother care tools">
           
           {/* PRIMARY EASY VOICE & VISUAL GUIDE TAB */}
           <button
             onClick={() => setActiveTab("guide")}
+            aria-current={activeTab === "guide" ? "page" : undefined}
             className={`px-4 py-2.5 rounded-2xl text-xs font-black shrink-0 transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "guide"
-                ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md scale-102"
+                ? "bg-brand-purple text-white shadow-sm"
                 : "text-orange-950 bg-amber-50 hover:bg-amber-100 border border-amber-200/60"
             }`}
           >
-            <Sparkles className={`w-4 h-4 ${activeTab === "guide" ? "text-white" : "text-amber-600 animate-spin"}`} />
-            <span>{language === "igbo" ? "Ntuziaka dị Mfe (Easy Voice Guide)" : language === "pidgin" ? "Easy Voice Guide (Hear am)" : "Easy Voice & Visual Guide"}</span>
+            <Sparkles className={`w-4 h-4 ${activeTab === "guide" ? "text-white" : "text-brand-purple"}`} />
+            <span>{language === "igbo" ? "Ntuziaka dị Mfe (Easy Voice Guide)" : language === "pidgin" ? "Hear health advice" : "Simple health guide"}</span>
           </button>
 
           <button
             onClick={() => setActiveTab("journey")}
+            aria-current={activeTab === "journey" ? "page" : undefined}
             className={`px-4 py-2.5 rounded-2xl text-xs font-bold shrink-0 transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "journey"
                 ? "bg-brand-purple text-white shadow-xs"
@@ -454,11 +407,12 @@ export default function MotherPortal({
             }`}
           >
             <Heart className={`w-4 h-4 ${activeTab === "journey" ? "fill-pink-400 text-pink-300" : "text-pink-500"}`} />
-            <span>{language === "igbo" ? "Ogo Ime & Nwa (Journey)" : language === "pidgin" ? "Pregnancy Journey" : "My Journey & Stages"}</span>
+            <span>{language === "igbo" ? "Ogo Ime & Nwa (Journey)" : language === "pidgin" ? "Pregnancy Journey" : "My pregnancy"}</span>
           </button>
 
           <button
             onClick={() => setActiveTab("rescue")}
+            aria-current={activeTab === "rescue" ? "page" : undefined}
             className={`px-4 py-2.5 rounded-2xl text-xs font-bold shrink-0 transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "rescue"
                 ? "bg-red-600 text-white shadow-xs"
@@ -466,11 +420,12 @@ export default function MotherPortal({
             }`}
           >
             <ShieldAlert className={`w-4 h-4 ${activeTab === "rescue" ? "text-white" : "text-red-600"}`} />
-            <span>{language === "igbo" ? "Enyemaka Mberede (Emergency)" : language === "pidgin" ? "Emergency Map" : "Emergency Rescue & Map"}</span>
+            <span>{language === "igbo" ? "Enyemaka Mberede (Emergency)" : language === "pidgin" ? "Emergency Map" : "Find urgent help"}</span>
           </button>
 
           <button
             onClick={() => setActiveTab("ai")}
+            aria-current={activeTab === "ai" ? "page" : undefined}
             className={`px-4 py-2.5 rounded-2xl text-xs font-bold shrink-0 transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "ai"
                 ? "bg-purple-900 text-white shadow-xs"
@@ -478,11 +433,12 @@ export default function MotherPortal({
             }`}
           >
             <Sparkles className={`w-4 h-4 ${activeTab === "ai" ? "text-pink-300" : "text-brand-purple"}`} />
-            <span>{language === "igbo" ? "Ajụjụ Dọkịta AI" : language === "pidgin" ? "AI Doctor Guide" : "AI Guide & Symptom Check"}</span>
+            <span>{language === "igbo" ? "Ajụjụ Dọkịta AI" : language === "pidgin" ? "AI Doctor Guide" : "Ask a question"}</span>
           </button>
 
           <button
             onClick={() => setActiveTab("tracking")}
+            aria-current={activeTab === "tracking" ? "page" : undefined}
             className={`px-4 py-2.5 rounded-2xl text-xs font-bold shrink-0 transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "tracking"
                 ? "bg-teal-700 text-white shadow-xs"
@@ -490,11 +446,12 @@ export default function MotherPortal({
             }`}
           >
             <Activity className={`w-4 h-4 ${activeTab === "tracking" ? "text-white" : "text-teal-600"}`} />
-            <span>{language === "igbo" ? "Mgbali Ọbara & Vitals" : language === "pidgin" ? "Vitals & BP" : "Vitals & Tracking"}</span>
+            <span>{language === "igbo" ? "Mgbali Ọbara & Vitals" : language === "pidgin" ? "Vitals & BP" : "Health checks"}</span>
           </button>
 
           <button
             onClick={() => setActiveTab("community")}
+            aria-current={activeTab === "community" ? "page" : undefined}
             className={`px-4 py-2.5 rounded-2xl text-xs font-bold shrink-0 transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "community"
                 ? "bg-pink-600 text-white shadow-xs"
@@ -502,11 +459,11 @@ export default function MotherPortal({
             }`}
           >
             <Users className={`w-4 h-4 ${activeTab === "community" ? "text-white" : "text-pink-600"}`} />
-            <span>{language === "igbo" ? "Ogbe Nne na Nwa" : language === "pidgin" ? "Mothers Community" : "Nigerian Mothers Community"}</span>
+            <span>{language === "igbo" ? "Ogbe Nne na Nwa" : language === "pidgin" ? "Mothers Community" : "Mothers' community"}</span>
           </button>
 
         </div>
-      </div>
+      <div className="mvp-disclosure-body"><button className="text-brand-purple flex items-center gap-2" onClick={() => { setShowUssdModal(true); setUssdLogs(["Dialing *384*99# on GSM SIM network..."]); setUssdStep(1); }}><Radio size={18}/>Offline help (USSD demo)</button></div></details>
 
       {/* 3. SOS ACTIVE COUNTDOWN / DISPATCH MODAL */}
       <AnimatePresence>
@@ -635,6 +592,8 @@ export default function MotherPortal({
           </div>
         )}
       </AnimatePresence>
+
+      <h2 className="mvp-current-tool">{({guide: language === "igbo" ? "Lelee ahụ ike gị" : "Check how you feel", journey: "My pregnancy", rescue: "Find urgent help", ai: "Ask a question", tracking: "Health checks", community: "Mothers community"})[activeTab]}</h2>
 
       {/* 4. TAB 0: EASY VOICE & VISUAL GUIDE (PRIMARY SCREEN FOR UNLEARNED/LOCAL MOTHERS) */}
       {activeTab === "guide" && (

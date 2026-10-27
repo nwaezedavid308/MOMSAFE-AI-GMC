@@ -22,7 +22,7 @@ export default function SimplifiedMotherGuide({
   onTriggerSos,
   onSelectDangerSign
 }: SimplifiedMotherGuideProps) {
-  const [selectedFeeling, setSelectedFeeling] = useState<"fine" | "tired" | "sick" | null>("fine");
+  const [selectedFeeling, setSelectedFeeling] = useState<"fine" | "tired" | "sick" | null>(null);
   const [activeDangerSigns, setActiveDangerSigns] = useState<Record<string, boolean>>({});
   const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
 
@@ -284,9 +284,7 @@ export default function SimplifiedMotherGuide({
                       <h4 className="font-extrabold text-sm text-slate-900 leading-tight">
                         {language === "igbo" ? sign.titleIgbo : language === "pidgin" ? sign.titlePidgin : sign.titleEnglish}
                       </h4>
-                      <p className="text-xs text-slate-600 mt-1 leading-snug font-medium">
-                        {language === "igbo" ? sign.descIgbo : language === "pidgin" ? sign.descPidgin : sign.descEnglish}
-                      </p>
+                      <details className="mvp-sign-description" onClick={e => e.stopPropagation()}><summary>{language === "igbo" ? "Nkọwa" : language === "pidgin" ? "Wetin this mean?" : "What does this mean?"}</summary><p className="text-xs text-slate-600 mt-1 leading-snug font-medium">{language === "igbo" ? sign.descIgbo : language === "pidgin" ? sign.descPidgin : sign.descEnglish}</p></details>
                       <div className="mt-2 text-[11px] font-bold flex items-center gap-1.5">
                         <span className={`px-2 py-0.5 rounded-md ${
                           sign.severity === "RED" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-800"

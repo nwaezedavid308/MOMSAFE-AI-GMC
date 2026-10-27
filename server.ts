@@ -825,8 +825,9 @@ async function bootstrap() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`MOMSAFE Connect server running at http://0.0.0.0:${PORT}`);
+  const host = process.env.NODE_ENV === "production" ? "0.0.0.0" : "127.0.0.1";
+  app.listen(PORT, host, () => {
+    console.log(`MOMSAFE Connect server running at http://${host}:${PORT}`);
   });
 }
 

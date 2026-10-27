@@ -19,7 +19,15 @@ export default function HospitalDashboard({ cases, onCaseUpdated, onOpenAssistan
   // Active selected case
   const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
   
+  useEffect(() => {
+    setShowOverrideForm(false);
+    setShowOutcomeForm(false);
+    setNoteText("");
+    if (selectedCaseId) document.getElementById("hospital-case-detail")?.scrollIntoView({ block: "start", behavior: "instant" });
+  }, [selectedCaseId]);
+
   // Filters State
+  const [queueView, setQueueView] = useState<"active" | "completed">("active");
   const [filterRisk, setFilterRisk] = useState<string>("ALL");
   const [filterStatus, setFilterStatus] = useState<string>("ALL");
   const [filterCommunity, setFilterCommunity] = useState<string>("ALL");
@@ -60,6 +68,19 @@ export default function HospitalDashboard({ cases, onCaseUpdated, onOpenAssistan
 
   // Handle case selection
   const selectedCase = cases.find(c => c.id === selectedCaseId) || null;
+
+  const symptomFindings = selectedCase ? [
+                    { flag: selectedCase.severePain, label: "Severe Pain" },
+                    { flag: selectedCase.severeHeadache, label: "Severe Headache" },
+                    { flag: selectedCase.visualDisturbance, label: "Vision Disturbances" },
+                    { flag: selectedCase.swellingFeet, label: "Facial/Feet Swelling" },
+                    { flag: selectedCase.highFever, label: "High Fever" },
+                    { flag: selectedCase.convulsions, label: "Convulsions / Fits" },
+                    { flag: selectedCase.breathingDifficulty, label: "Breathing Difficulty" },
+                    { flag: selectedCase.lossOfConsciousness, label: "Loss of Consciousness" },
+                    { flag: selectedCase.reducedFetalMovement, label: "Reduced Fetal Movement" },
+                    { flag: selectedCase.laborProgressConcerns, label: "Labor Progress Concerns" },
+                  ] : [];
 
   // Sync checklist changes with the server (FR-DASH-006)
   const handleToggleChecklist = async (caseId: string, checklistId: string, checked: boolean) => {
@@ -194,6 +215,7 @@ export default function HospitalDashboard({ cases, onCaseUpdated, onOpenAssistan
 
   // Filter computation
   const filteredCases = cases.filter(c => {
+    if (queueView === "active" ? c.status === "Closed" : c.status !== "Closed") return false;
     if (filterRisk !== "ALL" && c.riskCategory !== filterRisk) return false;
     if (filterStatus !== "ALL" && c.status !== filterStatus) return false;
     if (filterCommunity !== "ALL" && c.community !== filterCommunity) return false;
@@ -204,16 +226,16 @@ export default function HospitalDashboard({ cases, onCaseUpdated, onOpenAssistan
   const communities = Array.from(new Set(cases.map(c => c.community)));
 
   return (
-    <div className="bg-slate-50 border border-slate-200 rounded-3xl overflow-hidden shadow-md flex flex-col h-[740px]">
+    <div className="hospital-workspace">
       
       {/* Alert Sirens banner for unacknowledged RED cases */}
       {playAlert && (
-        <div className="bg-red-600 text-white px-5 py-3 flex items-center justify-between animate-pulse">
+        <div className="hospital-urgent-alert" role="alert">
           <div className="flex items-center gap-3">
-            <Bell className="w-5 h-5 text-white animate-bounce shrink-0" />
+            <Bell className="w-5 h-5 text-white shrink-0" />
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider">Unacknowledged RED Referral Alert</p>
-              <p className="text-[11px] opacity-90 font-medium">Critical danger sign case pending clinical team acknowledgement!</p>
+              <p className="text-xs font-bold uppercase tracking-wider">Urgent referral needs review</p>
+              <p className="text-[11px] opacity-90 font-medium">Open the referral and prepare care.</p>
             </div>
           </div>
           <button
@@ -236,31 +258,35 @@ export default function HospitalDashboard({ cases, onCaseUpdated, onOpenAssistan
             }}
             className="px-4 py-1.5 bg-white text-red-700 hover:bg-red-50 rounded-lg text-xs font-bold transition-all shrink-0 shadow-sm"
           >
-            Acknowledge Now
+            Review urgent referral
           </button>
         </div>
       )}
 
       {/* Grid view containing Queue and Detail inspect panels */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="hospital-layout">
         
         {/* LEFT COLUMN: LIVE REFERRAL QUEUE */}
-        <div className={`w-full md:w-1/2 md:border-r border-slate-200 flex flex-col h-full bg-white ${selectedCaseId ? "hidden md:flex" : "flex"}`}>
+        <div className={`hospital-queue ${selectedCaseId ? "hidden" : ""}`}>
           
+          <div className="patient-tabs hospital-tabs" aria-label="Referral lists">
+            <button type="button" aria-pressed={queueView === "active"} className={queueView === "active" ? "selected" : ""} onClick={() => { setQueueView("active"); setFilterStatus("ALL"); }}><ClipboardList size={19}/>Active referrals <span>{cases.filter(c => c.status !== "Closed").length}</span></button>
+            <button type="button" aria-pressed={queueView === "completed"} className={queueView === "completed" ? "selected" : ""} onClick={() => { setQueueView("completed"); setFilterStatus("ALL"); }}><CheckCircle2 size={19}/>Completed <span>{cases.filter(c => c.status === "Closed").length}</span></button>
+          </div>
           {/* Header & Filter Controls */}
-          <div className="p-4 border-b border-slate-100 bg-slate-50 space-y-3">
+          <div className="hospital-queue-heading">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-bold text-sm text-slate-800 uppercase tracking-wide">Live Referral Queue</h3>
-                <p className="text-[11px] text-slate-500">Googwill Medical Centre clinical arrivals board</p>
+                <h3 className="font-bold text-sm text-slate-800 uppercase tracking-wide">{queueView === "active" ? "Mothers needing care" : "Completed referrals"}</h3>
+                <p className="text-[11px] text-slate-500">Select a mother to review her referral.</p>
               </div>
               <span className="text-[11px] font-semibold bg-brand-purple/10 text-brand-purple px-2.5 py-1 rounded-full">
-                {filteredCases.length} Active Referrals
+                {filteredCases.length} referrals
               </span>
             </div>
 
             {/* Filter controls row */}
-            <div className="grid grid-cols-3 gap-2">
+            <details className="mvp-disclosure filter-menu"><summary><span><Filter size={17}/>Filter referrals{(filterRisk !== "ALL" || filterStatus !== "ALL" || filterCommunity !== "ALL") && <span className="filter-active">Active</span>}</span><ChevronDown size={17}/></summary><div className="mvp-filter-fields">
               <div>
                 <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Risk Tier</label>
                 <select
@@ -305,11 +331,11 @@ export default function HospitalDashboard({ cases, onCaseUpdated, onOpenAssistan
                   ))}
                 </select>
               </div>
-            </div>
+            </div></details>
           </div>
 
           {/* Scrolling queue list (RED always sorting above Amber, then Green) */}
-          <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
+          <div className="hospital-referral-list">
             {filteredCases
               .sort((a, b) => {
                 // RED first, then AMBER, then others
@@ -344,91 +370,40 @@ export default function HospitalDashboard({ cases, onCaseUpdated, onOpenAssistan
                       isSelected ? "bg-purple-50/40 border-l-4 border-brand-purple" : ""
                     } ${isRedNew ? "bg-red-50/20 animate-flash-red" : ""}`}
                   >
-                    {/* Top Row: ID, Time, Risk badge */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] font-mono text-slate-500 font-bold">{c.id}</span>
-                        <div className="flex items-center gap-1 text-[10px] text-slate-400">
-                          <Clock className="w-3 h-3" />
-                          <span>{getElapsedTime(c.createdAt)}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-1.5">
-                        {/* Clinical Override badge if active */}
-                        {c.triageCategory && (
-                          <span className="text-[9px] bg-teal-50 text-teal-800 px-2 py-0.5 rounded-md border border-teal-200 font-bold flex items-center gap-0.5">
-                            <ShieldCheck className="w-2.5 h-2.5" />
-                            <span>MD Overridden ({c.triageCategory})</span>
-                          </span>
-                        )}
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          c.riskCategory === "RED"
-                            ? "bg-red-100 text-red-800"
-                            : c.riskCategory === "AMBER"
-                            ? "bg-amber-100 text-amber-800"
-                            : "bg-emerald-100 text-emerald-800"
-                        }`}>
-                          {c.riskCategory} Risk
-                        </span>
-                      </div>
+                    <div className="referral-card-heading">
+                      <h4>{c.name}</h4>
+                      <span className={"referral-risk risk-" + c.riskCategory.toLowerCase()}>{c.riskCategory} risk</span>
                     </div>
-
-                    {/* Middle Row: Name & Age */}
-                    <div>
-                      <h4 className="font-semibold text-xs text-slate-800 flex items-center gap-1.5">
-                        <span>{c.name}</span>
-                        <span className="text-[10px] text-slate-400 font-normal">Age {c.age}</span>
-                      </h4>
-                      <p className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1">
-                        <MapPin className="w-3 h-3 text-slate-400" />
-                        <span>{c.community} • {c.gestationalAge} (Parity {c.parity})</span>
-                      </p>
-                    </div>
-
-                    {/* Bottom Row: Status Badge & TBA reporter */}
-                    <div className="flex items-center justify-between border-t border-slate-100 pt-2 mt-1">
-                      <span className="text-[9px] text-slate-400">
-                        By: <strong>{c.tbaName}</strong>
-                      </span>
-                      
-                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md ${
-                        c.status === "New"
-                          ? "bg-blue-50 text-blue-700 border border-blue-200"
-                          : c.status === "Closed"
-                          ? "bg-slate-100 text-slate-600"
-                          : "bg-purple-50 text-brand-purple border border-purple-100"
-                      }`}>
-                        {c.status}
-                      </span>
-                    </div>
+                    <p className="referral-card-description">{c.gestationalAge} · {c.community}</p>
+                    {c.triageCategory && <p className="referral-reviewed"><ShieldCheck size={15}/>Clinician review: {c.triageCategory}</p>}
+                    <div className="referral-card-bottom"><span>{c.status}</span><span><Clock size={14}/>{getElapsedTime(c.createdAt)}<span className="referral-open">View referral <ChevronDown size={16}/></span></span></div>
                   </button>
                 );
               })}
             {filteredCases.length === 0 && (
               <div className="text-center py-12 text-slate-400 text-xs">
-                No active maternal referrals matching selection.
+                No referrals in this view. Try changing the filters.
               </div>
             )}
           </div>
         </div>
 
         {/* RIGHT COLUMN: DETAIL CASE INSPECTION */}
-        <div className={`w-full md:w-1/2 flex flex-col h-full bg-slate-50 overflow-y-auto ${selectedCaseId ? "flex" : "hidden md:flex"}`}>
+        <div className={`hospital-case ${selectedCaseId ? "" : "hidden"}`}>
           {selectedCase ? (
-            <div className="p-5 space-y-5">
-              {/* Close Detail / Back to Live Queue Button */}
+            <div className="hospital-case-sections" id="hospital-case-detail" key={selectedCase.id}>
+              {/* Close Detail / Back to referrals Button */}
               <div className="flex">
                 <button
                   onClick={() => setSelectedCaseId(null)}
                   className="flex items-center gap-2 px-3.5 py-1.5 bg-white border border-slate-200 text-brand-purple hover:bg-slate-50 text-xs font-bold rounded-xl transition-all shadow-xs"
                 >
                   <ArrowLeft className="w-3.5 h-3.5 text-brand-purple" />
-                  <span>Back to Live Queue</span>
+                  <span>Back to referrals</span>
                 </button>
               </div>
               {/* Header block */}
-              <div className="bg-white border border-slate-150 p-4 rounded-2xl shadow-sm flex items-start justify-between">
+              <div className="hospital-case-summary">
                 <div>
                   <div className="flex items-center gap-1.5">
                     <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-mono font-bold">
@@ -453,6 +428,7 @@ export default function HospitalDashboard({ cases, onCaseUpdated, onOpenAssistan
                 <div className="flex flex-col items-end gap-1.5">
                   <span className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">Referral Status</span>
                   <select
+                    aria-label="Referral status"
                     value={selectedCase.status}
                     onChange={(e) => {
                       if (e.target.value === "Closed") {
@@ -474,7 +450,7 @@ export default function HospitalDashboard({ cases, onCaseUpdated, onOpenAssistan
                 </div>
               </div>
 
-              {/* Patient Basic Info Card */}
+<details className="mvp-disclosure"><summary>Mother & contact details<ChevronDown size={18}/></summary><div className="mvp-disclosure-body">              {/* Patient Basic Info Card */}
               <div className="bg-white border border-slate-150 p-4 rounded-2xl shadow-sm space-y-2">
                 <h4 className="font-semibold text-xs text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2 flex items-center gap-1.5">
                   <User className="w-4 h-4 text-brand-purple" />
@@ -504,16 +480,18 @@ export default function HospitalDashboard({ cases, onCaseUpdated, onOpenAssistan
                 </div>
               </div>
 
+</div></details>
+              <h2 className="hospital-section-title">Health information</h2>
               {/* Vitals Signs inspect grid */}
               <div className="bg-white border border-slate-150 p-4 rounded-2xl shadow-sm">
                 <h4 className="font-semibold text-xs text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2 mb-3.5 flex items-center gap-1.5">
                   <Activity className="w-4 h-4 text-brand-purple" />
-                  <span>Recorded Physiological Vitals</span>
+                  <span>Recorded vital signs</span>
                 </h4>
-                <div className="grid grid-cols-5 gap-2 text-center">
+                <div className="hospital-vitals-grid">
                   <div className="bg-slate-50 border border-slate-100 p-2 rounded-xl flex flex-col justify-between h-full min-h-[70px]">
                     <div className="flex items-center justify-between gap-1 mb-0.5">
-                      <span className="block text-[8px] font-bold text-slate-400 uppercase tracking-wider">Blood Pres</span>
+                      <span className="block text-[8px] font-bold text-slate-400 uppercase tracking-wider">Blood pressure</span>
                       <IgboInfoButton termId="bp" className="px-1 py-0 border-0 bg-transparent text-[#32134F] hover:bg-purple-100/50 scale-75 origin-right" />
                     </div>
                     <span className="block font-mono font-bold text-xs text-slate-800">
@@ -547,7 +525,7 @@ export default function HospitalDashboard({ cases, onCaseUpdated, onOpenAssistan
                   </div>
 
                   <div className="bg-slate-50 border border-slate-100 p-2 rounded-xl">
-                    <span className="block text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Data Qual</span>
+                    <span className="block text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Data quality</span>
                     <span className="block font-mono font-bold text-[9px] text-emerald-700 uppercase tracking-wide mt-1.5">
                       {selectedCase.dataQuality}
                     </span>
@@ -559,7 +537,7 @@ export default function HospitalDashboard({ cases, onCaseUpdated, onOpenAssistan
               <div className="bg-white border border-slate-150 p-4 rounded-2xl shadow-sm">
                 <h4 className="font-semibold text-xs text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2 mb-3 flex items-center gap-1.5">
                   <ClipboardList className="w-4 h-4 text-brand-purple" />
-                  <span>Symptom Checklist Findings</span>
+                  <span>Reported warning signs</span>
                 </h4>
                 
                 <div className="flex flex-wrap gap-1.5">
@@ -573,18 +551,7 @@ export default function HospitalDashboard({ cases, onCaseUpdated, onOpenAssistan
                     Vaginal Bleeding: {selectedCase.bleeding.toUpperCase()}
                   </span>
 
-                  {[
-                    { flag: selectedCase.severePain, label: "Severe Pain" },
-                    { flag: selectedCase.severeHeadache, label: "Severe Headache" },
-                    { flag: selectedCase.visualDisturbance, label: "Vision Disturbances" },
-                    { flag: selectedCase.swellingFeet, label: "Facial/Feet Swelling" },
-                    { flag: selectedCase.highFever, label: "High Fever" },
-                    { flag: selectedCase.convulsions, label: "Convulsions / Fits" },
-                    { flag: selectedCase.breathingDifficulty, label: "Breathing Difficulty" },
-                    { flag: selectedCase.lossOfConsciousness, label: "Loss of Consciousness" },
-                    { flag: selectedCase.reducedFetalMovement, label: "Reduced Fetal Movement" },
-                    { flag: selectedCase.laborProgressConcerns, label: "Labor Progress Concerns" },
-                  ].map((item, i) => (
+                  {symptomFindings.filter(item => item.flag).map((item, i) => (
                     <span
                       key={i}
                       className={`px-2.5 py-1 rounded-full text-[10px] font-semibold border ${
@@ -598,6 +565,8 @@ export default function HospitalDashboard({ cases, onCaseUpdated, onOpenAssistan
                   ))}
                 </div>
 
+                {symptomFindings.some(item => !item.flag) && <details className="mvp-inline-details"><summary>Other symptoms checked</summary><ul className="hospital-negative-symptoms">{symptomFindings.filter(item => !item.flag).map(item => <li key={item.label}>{item.label}: not reported</li>)}</ul></details>}
+
                 {selectedCase.customNote && (
                   <div className="mt-3.5 p-3 bg-slate-50 rounded-xl border border-slate-100">
                     <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">TBA Notes</span>
@@ -606,7 +575,7 @@ export default function HospitalDashboard({ cases, onCaseUpdated, onOpenAssistan
                 )}
               </div>
 
-              {/* AI scoring explanation logic */}
+<details className="mvp-disclosure"><summary>How the risk was calculated<ChevronDown size={18}/></summary><div className="mvp-disclosure-body">              {/* AI scoring explanation logic */}
               <div className="bg-purple-50/50 border border-purple-100 p-4 rounded-2xl">
                 <h4 className="font-semibold text-xs text-brand-purple uppercase tracking-wider mb-2 flex items-center gap-1.5">
                   <Bot className="w-4 h-4" />
@@ -620,7 +589,8 @@ export default function HospitalDashboard({ cases, onCaseUpdated, onOpenAssistan
                 </div>
               </div>
 
-              {/* Clinical Override Panel (FR-DASH-007) */}
+</div></details>
+<details className="mvp-disclosure"><summary>Clinician risk review<ChevronDown size={18}/></summary><div className="mvp-disclosure-body">              {/* Clinical Override Panel (FR-DASH-007) */}
               <div className="bg-white border border-slate-150 p-4 rounded-2xl shadow-sm">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-3">
                   <h4 className="font-semibold text-xs text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
@@ -721,11 +691,13 @@ export default function HospitalDashboard({ cases, onCaseUpdated, onOpenAssistan
                 )}
               </div>
 
+</div></details>
+              <h2 className="hospital-section-title">Prepare care</h2>
               {/* GMC Preparation Checklist Action panel (FR-DASH-006) */}
               <div className="bg-white border border-slate-150 p-4 rounded-2xl shadow-sm space-y-3">
                 <h4 className="font-semibold text-xs text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2 flex items-center gap-1.5">
                   <CheckSquare className="w-4 h-4 text-brand-purple" />
-                  <span>GMC Referral Preparation Checklist</span>
+                  <span>Care preparation checklist</span>
                 </h4>
                 
                 <div className="space-y-2">
@@ -748,7 +720,7 @@ export default function HospitalDashboard({ cases, onCaseUpdated, onOpenAssistan
                 </div>
               </div>
 
-              {/* Closed arrival outcomes details */}
+{selectedCase.arrivalOutcome && <details className="mvp-disclosure"><summary>Arrival & outcomes<ChevronDown size={18}/></summary><div className="mvp-disclosure-body">              {/* Closed arrival outcomes details */}
               {selectedCase.arrivalOutcome && (
                 <div className="bg-white border border-slate-150 p-4 rounded-2xl shadow-sm space-y-2">
                   <h4 className="font-semibold text-xs text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2 flex items-center gap-1.5">
@@ -786,14 +758,15 @@ export default function HospitalDashboard({ cases, onCaseUpdated, onOpenAssistan
                 </div>
               )}
 
-              {/* Notes & Logs panel */}
+</div></details>}
+<details className="mvp-disclosure"><summary>Care notes & activity<ChevronDown size={18}/></summary><div className="mvp-disclosure-body">              {/* Notes & Logs panel */}
               <div className="bg-white border border-slate-150 p-4 rounded-2xl shadow-sm space-y-4">
                 <h4 className="font-semibold text-xs text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2 flex items-center gap-1.5">
                   <MessageSquare className="w-4 h-4 text-brand-purple" />
-                  <span>Clinical Case Log Logs</span>
+                  <span>Care notes</span>
                 </h4>
 
-                <div className="space-y-2 max-h-44 overflow-y-auto divide-y divide-slate-100">
+                <div className="space-y-2 divide-y divide-slate-100">
                   {selectedCase.notes.map((note, i) => (
                     <div key={i} className="py-2.5 first:pt-0 last:pb-0 text-xs">
                       <div className="flex items-center justify-between font-semibold text-[10px] text-slate-400">
@@ -837,13 +810,14 @@ export default function HospitalDashboard({ cases, onCaseUpdated, onOpenAssistan
                 </form>
               </div>
 
+</div></details>
               {/* Chat Helper bridge trigger */}
               <button
                 onClick={() => onOpenAssistant(selectedCase)}
                 className="w-full py-2.5 bg-purple-50 text-brand-purple border border-purple-100 hover:bg-brand-purple hover:text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5"
               >
                 <Bot className="w-4 h-4" />
-                <span>Consult MOMSAFE Assistant on this case</span>
+                <span>Ask about this referral</span>
               </button>
             </div>
           ) : (

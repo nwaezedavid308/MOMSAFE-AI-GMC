@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
-  UserPlus, Search, ClipboardList, Activity, PhoneCall, AlertTriangle, CheckCircle2, 
+  Users, UserPlus, Search, ClipboardList, Activity, PhoneCall, AlertTriangle, CheckCircle2,
   HelpCircle, Wifi, WifiOff, RefreshCw, Send, ChevronRight, ChevronLeft, ArrowRight, ArrowLeft,
   UserCheck, Shield, Lock, Phone, User, LogOut, Check, Info, Bot, Mic,
   Edit3, Calendar, History, Plus, X, Clock
@@ -727,8 +727,8 @@ export default function TBAPortal({ onCaseSubmitted, onOpenAssistant, currentUse
   );
 
   return (
-    <div className="bg-slate-50 border border-slate-200 rounded-3xl overflow-hidden shadow-md flex flex-col min-h-[680px]">
-      {/* Top Banner - System & Sync bar */}
+    <div className="tba-workspace flex flex-col">
+<details className="mvp-disclosure tba-account-menu"><summary>Birth attendant & connection details</summary>      {/* Top Banner - System & Sync bar */}
       <div className="bg-dark-purple text-white px-5 py-3.5 flex items-center justify-between border-b border-purple-950/20">
         <div className="flex items-center gap-2.5">
           <div className="w-2 h-2 rounded-full bg-teal-400 animate-ping"></div>
@@ -796,8 +796,9 @@ export default function TBAPortal({ onCaseSubmitted, onOpenAssistant, currentUse
         </div>
       )}
 
+</details>
       {/* Main Container */}
-      <div className="flex-1 p-5 flex flex-col justify-between">
+      <div className="tba-workspace-body flex-1 flex flex-col">
         {!isAuthenticated ? (
           /* Secure PIN Screen */
           <div className="my-auto max-w-sm mx-auto w-full bg-white border border-slate-100 rounded-2xl p-6 shadow-sm text-center">
@@ -836,36 +837,11 @@ export default function TBAPortal({ onCaseSubmitted, onOpenAssistant, currentUse
         ) : (
           /* Active App Portal Screens */
           <div className="flex-1 flex flex-col">
-            {/* Nav Tabs Bar */}
-            <div className="grid grid-cols-2 gap-2 mb-4 bg-slate-200/60 p-1 rounded-xl">
-              <button
-                onClick={() => setActiveTab("search")}
-                className={`py-2 text-xs font-medium rounded-lg transition-all flex items-center justify-center gap-1.5 ${
-                  activeTab === "search" || activeTab === "assess"
-                    ? "bg-white text-brand-purple shadow-sm font-semibold"
-                    : "text-slate-600 hover:text-slate-800"
-                }`}
-              >
-                <ClipboardList className="w-3.5 h-3.5" />
-                <span>Search / New Case</span>
-              </button>
-              
-              <button
-                onClick={() => {
-                  if (submittedResult) setActiveTab("result");
-                  else alert("Complete and submit an assessment to see results.");
-                }}
-                className={`py-2 text-xs font-medium rounded-lg transition-all flex items-center justify-center gap-1.5 ${
-                  activeTab === "result"
-                    ? "bg-white text-brand-purple shadow-sm font-semibold"
-                    : "text-slate-600 hover:text-slate-800"
-                }`}
-                disabled={!submittedResult}
-              >
-                <Activity className="w-3.5 h-3.5" />
-                <span>Current Result</span>
-              </button>
+            <div className="patient-tabs" aria-label="Patient options">
+              <button type="button" aria-pressed={activeTab === "register"} className={activeTab === "register" ? "selected" : ""} onClick={() => setActiveTab("register")}><UserPlus size={19}/><span>Create new patient</span></button>
+              <button type="button" aria-pressed={activeTab !== "register"} className={activeTab !== "register" ? "selected" : ""} onClick={() => setActiveTab("search")}><Users size={19}/><span>Existing patients</span></button>
             </div>
+            {submittedResult && activeTab !== "result" && <button type="button" className="patient-last-result" onClick={() => setActiveTab("result")}><Activity size={17}/>View last health-check result<ChevronRight size={16}/></button>}
 
             <AnimatePresence mode="wait">
               {activeTab === "search" && (
@@ -877,9 +853,9 @@ export default function TBAPortal({ onCaseSubmitted, onOpenAssistant, currentUse
                 >
                   <div className="space-y-4">
                     {/* Search block */}
-                    <div className="bg-white border border-slate-150 p-4 rounded-2xl shadow-sm">
+                    <div className="patient-search-section">
                       <div className="flex items-center justify-between mb-2.5">
-                        <h4 className="font-semibold text-xs text-slate-800 uppercase tracking-wider">Find Registered Patient</h4>
+                        <h4 className="font-semibold text-xs text-slate-800 uppercase tracking-wider">Existing patients</h4>
                         <VoiceMicButton
                           label="Voice Search"
                           onTranscript={(text) => setSearchQuery(text)}
@@ -891,13 +867,15 @@ export default function TBAPortal({ onCaseSubmitted, onOpenAssistant, currentUse
                           type="text"
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          placeholder="Search pregnant mother's name or speak..."
+                          placeholder="Search by name or community"
+                          aria-label="Search existing patients by name or community"
+                          id="existing-patient-search"
                           className="w-full bg-slate-50 pl-9 pr-4 py-2.5 border border-slate-200 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple rounded-xl text-xs outline-none transition-all text-slate-800"
                         />
                       </div>
 
                       {/* Results list */}
-                      <div className="mt-3 space-y-2.5 max-h-60 overflow-y-auto pr-1">
+                      <div className="patient-search-results" aria-live="polite">
                         {filteredPatients.length > 0 ? (
                           filteredPatients.map((p, idx) => (
                             <div
@@ -914,17 +892,18 @@ export default function TBAPortal({ onCaseSubmitted, onOpenAssistant, currentUse
                                 <p className="text-[10px] text-slate-600 font-medium">
                                   Age {p.age} • Parity {p.parity} • {p.gestationalAge} ({p.homeAddress || p.community})
                                 </p>
-                                <div className="text-[10px] text-slate-500 flex flex-wrap items-center gap-2 pt-0.5">
+<details className="mvp-inline-details"><summary>Contact & family details</summary>                                <div className="text-[10px] text-slate-500 flex flex-wrap items-center gap-2 pt-0.5">
                                   <span>Phone: <strong className="text-slate-700">{p.phone || "None"}</strong></span>
                                   <span>•</span>
                                   <span>Kin Name: <strong className="text-slate-700">{p.nextOfKinName || p.nextOfKin?.split("(")[0]?.trim() || "Unrecorded"}</strong></span>
                                   <span>•</span>
                                   <span>Kin Phone: <strong className="text-slate-700">{p.nextOfKinPhone || p.nextOfKin?.match(/\((.*?)\)/)?.[1] || "Unrecorded"}</strong></span>
                                 </div>
+</details>
                               </div>
 
                               <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
-                                {/* Edit Button */}
+<details className="mvp-inline-details patient-options"><summary>Edit & visit history</summary><div className="patient-options-content">                                {/* Edit Button */}
                                 <button
                                   type="button"
                                   onClick={(e) => openEditModal(p, e)}
@@ -946,43 +925,25 @@ export default function TBAPortal({ onCaseSubmitted, onOpenAssistant, currentUse
                                   <span>History ({p.visitHistory?.length || 0})</span>
                                 </button>
 
+</div></details>
                                 {/* Assess Button */}
                                 <button
                                   type="button"
                                   onClick={() => handleSelectPatient(p)}
                                   className="px-2.5 py-1 bg-brand-purple hover:bg-dark-purple text-white rounded-lg text-[10px] font-semibold flex items-center gap-1 transition-colors shadow-sm"
                                 >
-                                  <span>Assess</span>
+                                  <span>Start health check</span>
                                   <ChevronRight className="w-3 h-3" />
                                 </button>
                               </div>
                             </div>
                           ))
                         ) : (
-                          <p className="text-center py-4 text-xs text-slate-400">No registered patient matches search.</p>
+                          <p className="text-center py-4 text-xs text-slate-400">No patients found. Try another name or community, or choose Create new patient.</p>
                         )}
                       </div>
                     </div>
 
-                    {/* Quick Register Patient Trigger Card */}
-                    <div className="bg-purple-50/50 border border-purple-100 p-4 rounded-2xl flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-white rounded-xl border border-purple-100 text-brand-purple">
-                          <UserPlus className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <h5 className="font-semibold text-xs text-slate-800">New Mother Registration</h5>
-                          <p className="text-[10px] text-slate-500 mt-0.5">Mother not listed? Create a card instantly.</p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => setActiveTab("register")}
-                        className="px-3.5 py-1.5 bg-brand-purple hover:bg-dark-purple text-white text-[11px] font-semibold rounded-lg transition-colors flex items-center gap-1"
-                      >
-                        <span>Register</span>
-                        <ChevronRight className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
                   </div>
 
                   {/* Helper Guidelines footer */}

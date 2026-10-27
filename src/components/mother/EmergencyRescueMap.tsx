@@ -492,18 +492,18 @@ export default function EmergencyRescueMap({ currentUser, onTriggerSos, selected
                 <span className={`px-2 py-0.5 rounded-md font-semibold ${
                   selectedFacility.is24h ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"
                 }`}>
-                  {selectedFacility.is24h ? "✓ 24/7 Obstetric Emergency Open" : "Day Clinic"}
+                  {selectedFacility.is24h ? "24/7 Obstetric Emergency Open" : "Day Clinic"}
                 </span>
 
                 {selectedFacility.bloodBankReady && (
                   <span className="bg-red-100 text-red-800 px-2 py-0.5 rounded-md font-semibold">
-                    ✓ Blood Bank Synchronized
+                    Blood Bank Synchronized
                   </span>
                 )}
 
                 {selectedFacility.theatreReady && (
                   <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-md font-semibold">
-                    ✓ C-Section Theatre On Standby
+                    C-Section Theatre On Standby
                   </span>
                 )}
               </div>

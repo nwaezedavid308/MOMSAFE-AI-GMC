@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
-  Users, MessageSquare, Heart, Sparkles, Plus, 
+  Users, MessageSquare, Heart, Sparkles, Plus, Check, X,
   Send, CheckCircle2, ShieldCheck, Search, Filter, 
   Tag, Baby, Stethoscope, Share2, HelpCircle, EyeOff, Lock, User
 } from "lucide-react";
@@ -307,7 +307,7 @@ export default function NigerianMothersCommunity({ currentUser }: NigerianMother
                   onClick={() => setShowNewPostModal(false)}
                   className="text-slate-400 hover:text-slate-600 text-xs font-bold"
                 >
-                  ✕
+                  <X className="w-4 h-4" aria-hidden="true" />
                 </button>
               </div>
 
@@ -376,7 +376,7 @@ export default function NigerianMothersCommunity({ currentUser }: NigerianMother
                   <div className={`w-4 h-4 rounded-full flex items-center justify-center border ${
                     postAsAnonymous ? "bg-brand-purple text-white border-brand-purple" : "border-slate-300"
                   }`}>
-                    {postAsAnonymous && <span className="text-[9px]">✓</span>}
+                    {postAsAnonymous && <span className="text-[9px]"><Check className="w-3 h-3" aria-hidden="true" /></span>}
                   </div>
                 </div>
 
