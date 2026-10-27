@@ -1,0 +1,6 @@
+{
+  "name": "MOMSAFE Connect",
+  "description": "AI-Powered Maternal Early-Warning, Referral and Hospital Readiness Platform for Googwill Medical Centre, Enugu State, Nigeria.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

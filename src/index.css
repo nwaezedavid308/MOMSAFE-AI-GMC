@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-brand-purple: #5B2C83;
+  --color-dark-purple: #32134F;
+  --color-light-purple: #F6F1FA;
+  --color-teal-accent: #0F766E;
+  
+  --color-result-green: #2E7D32;
+  --color-result-amber: #A65F00;
+  --color-result-red: #B42318;
+  --color-result-grey: #667085;
+}
+
+body {
+  @apply font-sans bg-slate-50 text-slate-900 selection:bg-brand-purple/20;
+}
+
+/* Custom scrollbar styling for a premium aesthetic */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Sound/Vibration simulation animations */
+@keyframes ringPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(180, 35, 24, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(180, 35, 24, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(180, 35, 24, 0);
+  }
+}
+
+.animate-ring-pulse {
+  animation: ringPulse 2s infinite;
+}
+
+@keyframes flashRed {
+  0%, 100% {
+    background-color: rgba(180, 35, 24, 0.05);
+  }
+  50% {
+    background-color: rgba(180, 35, 24, 0.15);
+  }
+}
+
+.animate-flash-red {
+  animation: flashRed 1.5s infinite;
+}

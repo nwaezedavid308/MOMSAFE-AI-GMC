@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MOMSAFE Connect</title>
+    <script>
+      (function() {
+        try {
+          var origFetch = window.fetch || (typeof globalThis !== 'undefined' ? globalThis.fetch : undefined);
+          if (origFetch) {
+            var _fetch = origFetch;
+            var descriptor = {
+              get: function() {
+                return _fetch;
+              },
+              set: function(val) {
+                _fetch = val;
+              },
+              configurable: true,
+              enumerable: true
+            };
+            try {
+              Object.defineProperty(window, 'fetch', descriptor);
+            } catch (e) {}
+            if (typeof globalThis !== 'undefined') {
+              try {
+                Object.defineProperty(globalThis, 'fetch', descriptor);
+              } catch (e) {}
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
